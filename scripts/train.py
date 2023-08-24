@@ -36,13 +36,13 @@ pi_pre = True
 pi_pre_epoch = 5
 output_dir = 'model_save/725mgchooser_pipre5lr1e4_'+dataset_name+'_'+modal
 visdom_name = 'G_loss&D_loss_725mgchooser_pipre5lr1e4_'+dataset_name+'_'+modal
-os.makedirs(output_dir,exist_ok=True)
+os.makedirs(output_dir,exist_ok=True)    ##为保存模型数据创建目录
 # print and log
-FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
-format_str = logging.Formatter(FORMAT)
-logger = logging.getLogger(output_dir+'/out.log')
-logger.setLevel(level=logging.INFO)
-sh = logging.StreamHandler()
+FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'    //编辑格式 日志级别名称、所在文件名称、输出日志的代码所在行数、日志内容
+format_str = logging.Formatter(FORMAT)    ##创建格式器
+logger = logging.getLogger(output_dir+'/out.log')    ##创建一个日志器logger
+logger.setLevel(level=logging.INFO)    ##设置日志器将会处理的日志级别
+sh = logging.StreamHandler()    
 sh.setFormatter(format_str)
 sh.setLevel(logging.INFO)
 fh = logging.FileHandler(output_dir+'/out.log',mode='a',encoding='utf-8')
@@ -50,9 +50,9 @@ fh.setFormatter(format_str)
 logger.addHandler(sh)
 logger.addHandler(fh)
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()    ##创建命令行解析器
 
-
+## 给解析器添加参数
 parser.add_argument('--pinet_pre', default=pi_pre, type=str)
 # Dataset options
 parser.add_argument('--other_modal', default=modal, type=str)
@@ -134,45 +134,45 @@ parser.add_argument('--gpu_num', default=gpu_num, type=str)
 # viz.line([[0.,0.]], [0], win='train', opts=dict(title='G_loss&D_loss', legend=['G_loss', 'D_loss']))
 # viz.line([[0.,0.]], [0], win='train', opts=dict(title='G_loss&D_loss', legend=['G_loss', 'D_loss']))
 
-def finetune_ini_weight(generator,discriminator):
+def finetune_ini_weight(generator,discriminator):    //利用mmstn模型的预训练的参数更新GAN的参数
     mmstn_path = 'pretrain_model/MMSTN_finetune.pt'
-    checkpoint = torch.load(mmstn_path)
+    checkpoint = torch.load(mmstn_path)    ##mmstn模型的参数字典
 
     # model_dict = self.Unet.state_dict()
     # state_dict = {k: v for k, v in pretrain_unet_model.items() if k in model_dict.keys()}
     # model_dict.update(state_dict)
     # self.Unet.load_state_dict(model_dict)
     #
-    g_model_dict = generator.state_dict()
-    pre_g_state_dict = {k: v for k, v in checkpoint['g_state'].items() if k in g_model_dict.keys()}
+    g_model_dict = generator.state_dict()    ##生成器模型的参数字典
+    pre_g_state_dict = {k: v for k, v in checkpoint['g_state'].items() if k in g_model_dict.keys()}    //参数字典的key是生成器模型参数字典所有key，但value是对应key在mmstn模型中的value
 
     d_model_dict = discriminator.state_dict()
     pre_d_state_dict = {k: v for k, v in checkpoint['d_state'].items() if k in d_model_dict.keys()}
 
-    g_model_dict.update(pre_g_state_dict)
+    g_model_dict.update(pre_g_state_dict)    //保留生成器参数字典的key，将key对应的value全部更新为mmstn模型的value
     d_model_dict.update(pre_d_state_dict)
 
-    generator.load_state_dict(g_model_dict)
+    generator.load_state_dict(g_model_dict)        //将更新后的参数字典加载回生成器模型
     discriminator.load_state_dict(d_model_dict)
     return generator,discriminator
+    
 
 
-
-def init_weights(m):
+def init_weights(m):    //初始化参数
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
         nn.init.kaiming_normal_(m.weight)
 
 
-def get_dtypes(args):
+def get_dtypes(args):    //将命令行解析器对象传入函数，返回long和float的tensor类型
     long_dtype = torch.LongTensor
     float_dtype = torch.FloatTensor
     if args.use_gpu == 1:
-        long_dtype = torch.cuda.LongTensor
+        long_dtype = torch.cuda.LongTensor    
         float_dtype = torch.cuda.FloatTensor
     return long_dtype, float_dtype
 
-def adjust_learning_rate(optimizer, epoch, learning_rate):
+def adjust_learning_rate(optimizer, epoch, learning_rate):    //更新学习率
     # lr = args.learning_rate * (0.2 ** (epoch // 2))
 
     lr_adjust = {epoch: learning_rate * (0.5 ** ((epoch-1) // 1))}
@@ -185,7 +185,7 @@ def adjust_learning_rate(optimizer, epoch, learning_rate):
 
 
 def main(args):
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_num
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_num    //将系统的环境变量中的设备设置为0号GPU
     train_path = get_dset_path(args.dataset_name, 'train')
     val_path = get_dset_path(args.dataset_name, 'val')
 
