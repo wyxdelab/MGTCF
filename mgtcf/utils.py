@@ -80,10 +80,10 @@ def get_gpu_memory():
 
 
 def get_dset_path(dset_name, dset_type):
-    _dir = os.path.dirname(__file__)
-    _dir = _dir.split("/")[:-1]
-    _dir = "/".join(_dir)
-    return os.path.join(_dir, 'datasets', dset_name, dset_type)
+    _dir = os.path.dirname(__file__)    //文件的绝对路径
+    _dir = _dir.split("/")[:-1]    //把路径按/分割为列表，并去掉文件名
+    _dir = "/".join(_dir)    //再把列表转换为路径
+    return os.path.join(_dir, 'datasets', dset_name, dset_type)    //将路径名、“datasets”、dset_name、dset_type合并为一个路径
 
 
 def relative_to_abs(rel_traj, start_pos):
