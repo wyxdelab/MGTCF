@@ -186,10 +186,10 @@ def adjust_learning_rate(optimizer, epoch, learning_rate):    //更新学习率
 
 def main(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_num    //将系统的环境变量中的设备设置为0号GPU
-    train_path = get_dset_path(args.dataset_name, 'train')
+    train_path = get_dset_path(args.dataset_name, 'train')    //得到训练集数据的保存路径
     val_path = get_dset_path(args.dataset_name, 'val')
 
-    long_dtype, float_dtype = get_dtypes(args)
+    long_dtype, float_dtype = get_dtypes(args)    //得到两种tensor类型
 
     logger.info("Initializing train dataset")
     train_dset, train_loader = data_loader(args, train_path)
