@@ -63,7 +63,7 @@ def seq_collate(data):
 
 
 
-def read_file(_path, delim='\t'):
+def read_file(_path, delim='\t'):    
     data = []
     add = []
     if delim == 'tab':
@@ -71,12 +71,12 @@ def read_file(_path, delim='\t'):
     elif delim == 'space':
         delim = ' '
     with open(_path, 'r') as f:
-        for line in f:
-            line = line.strip().split(delim)
-            add.append(line[-2:])
-            line = [float(i) for i in line[:-2]]
-            data.append(line)
-    return {'main':np.asarray(data),'addition':add}
+        for line in f:    //读取文件的每一行
+            line = line.strip().split(delim)    将每一行按照delim分割为列表，delim是txt文件中数据的分割符
+            add.append(line[-2:])        //向add中添加每一行最后两项数据
+            line = [float(i) for i in line[:-2]]    //把每一行除最后两项外其他项转化为float类型
+            data.append(line)        //向data中添加每一行除最后两项外的其他项
+    return {'main':np.asarray(data),'addition':add}          //把data的数据由列表转化为numpy.ndarray类型，其实data包含观测数据，add包含观测时间和台风名
 
 
 def poly_fit(traj, traj_len, threshold):
@@ -125,8 +125,8 @@ class TrajectoryDataset(Dataset):
         self.delim = delim
         self.modal_name = other_modal
 
-        all_files = os.listdir(self.data_dir)
-        all_files = [os.path.join(self.data_dir, _path) for _path in all_files]
+        all_files = os.listdir(self.data_dir)    //得到文件目录下所有文件名组成的列表
+        all_files = [os.path.join(self.data_dir, _path) for _path in all_files]    //将列表中所有文件的路径添加至所在文件目录路径，类似于绝对路径
         num_peds_in_seq = []
         seq_list = []
         seq_list_rel = []
@@ -137,9 +137,9 @@ class TrajectoryDataset(Dataset):
 
         # 迭代读取文件夹中的txt文件
         for path in all_files:
-            _,x = os.path.split(path)
-            tyname = os.path.splitext(x)[0]
-            data = read_file(path, delim)
+            _,x = os.path.split(path)    //将文件的绝对路径分割，x是文件名
+            tyname = os.path.splitext(x)[0]    //将文件名中除去扩展名的前半部分提取出来
+            data = read_file(path, delim)       //
             addinf = data['addition']
             data = data['main']
             frames = np.unique(data[:, 0]).tolist()
