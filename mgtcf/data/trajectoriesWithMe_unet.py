@@ -139,28 +139,28 @@ class TrajectoryDataset(Dataset):
         for path in all_files:
             _,x = os.path.split(path)    //将文件的绝对路径分割，x是文件名
             tyname = os.path.splitext(x)[0]    //将文件名中除去扩展名的前半部分提取出来
-            data = read_file(path, delim)       //
-            addinf = data['addition']
-            data = data['main']
-            frames = np.unique(data[:, 0]).tolist()
+            data = read_file(path, delim)       //将文件中的txt数据处理，把观测数据和附加数据分割开，返回字典data
+            addinf = data['addition']    //包含时间和台风名字的列表
+            data = data['main']    //包含观测数据的numpy类型的二维数组
+            frames = np.unique(data[:, 0]).tolist()    //把序号的结构转换为列表
             frame_data = []
-            for frame in frames:
+            for frame in frames:    //frame是序号
                 # 将txt文件中同一帧的，没有目标的坐标点保存在同一个frame_data的同一个index中
-                frame_data.append(data[frame == data[:, 0], :])
+                frame_data.append(data[frame == data[:, 0], :])                //将该序号所在行的观测值加入frame_data列表，最后列表的每一项代表一帧的观测数据，数据类型是一维numpy数组
             # 获取一个txt文件中的轨迹可以分割成多少个子轨迹，如第一个子轨迹：1,2,3...20，第二2,3,4，...21
             num_sequences = int(
-                math.ceil((len(frames) - self.seq_len + 1) / skip))
-            # 迭代子轨迹
-            for idx in range(0, num_sequences * self.skip + 1, skip):
+                math.ceil((len(frames) - self.seq_len + 1) / skip))    //seqlen的意思是子轨迹的长度，skip分割子轨迹时跳跃的步数，skip=1就是如上举例的第一和第二个子轨迹
+            # 迭代子轨迹                                                //num_sequences就是子轨迹的个数
+            for idx in range(0, num_sequences * self.skip + 1, skip):    //遍历每个子轨迹，idx是子轨迹开头的序号
                 # axis=0  照着row的方向叠在一起
                 curr_seq_data = np.concatenate(
-                    frame_data[idx:idx + self.seq_len], axis=0)
+                    frame_data[idx:idx + self.seq_len], axis=0)        //把一个子轨迹的观测数据组合为numpy二维数组，每一行是一帧的观测数据，行数是帧数
                 # peds_in_curr_seq  存储当前子序列的目标id，   ty的话   应该就是1
-                peds_in_curr_seq = np.unique(curr_seq_data[:, 1])
-                curr_seq_rel = np.zeros((len(peds_in_curr_seq), 4,
+                peds_in_curr_seq = np.unique(curr_seq_data[:, 1])    //就是1
+                curr_seq_rel = np.zeros((len(peds_in_curr_seq), 4,   // (1,4,20)
                                          self.seq_len))
-                curr_seq = np.zeros((len(peds_in_curr_seq), 4, self.seq_len))
-                curr_loss_mask = np.zeros((len(peds_in_curr_seq),
+                curr_seq = np.zeros((len(peds_in_curr_seq), 4, self.seq_len))    //(1,4,20)
+                curr_loss_mask = np.zeros((len(peds_in_curr_seq),            //(1,20)
                                            self.seq_len))
                 # 获取时间信息
                 curr_date_mask = np.zeros((len(peds_in_curr_seq), 4, self.seq_len))
