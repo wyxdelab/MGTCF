@@ -6,7 +6,7 @@ import sys
 import time
 import random
 
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(),'..')))
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(),'..')))    //把MGTCF的路径添加到系统的环境变量当中
 
 from collections import defaultdict
 from visdom import Visdom
@@ -28,8 +28,8 @@ from mgtcf.utils import relative_to_abs, get_dset_path
 torch.backends.cudnn.benchmark = True
 #
 
-gpu_num = '0'
-dataset_name = '1950_2019'
+gpu_num = '0'    //选择GPU
+dataset_name = '1950_2019'    //数据集文件名
 # [gph,mcc,10v,10u,sst,100v,100u]
 modal = 'gph'
 pi_pre = True
