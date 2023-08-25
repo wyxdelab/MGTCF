@@ -163,22 +163,22 @@ class TrajectoryDataset(Dataset):
                 curr_loss_mask = np.zeros((len(peds_in_curr_seq),            //(1,20)
                                            self.seq_len))
                 # 获取时间信息
-                curr_date_mask = np.zeros((len(peds_in_curr_seq), 4, self.seq_len))
+                curr_date_mask = np.zeros((len(peds_in_curr_seq), 4, self.seq_len))    //(1,4,20)
                 num_peds_considered = 0
                 _non_linear_ped = []
-                for _, ped_id in enumerate(peds_in_curr_seq):
+                for _, ped_id in enumerate(peds_in_curr_seq):    //ped_id=1    循环的目的是每一次循环处理一批第二列相同的观测数据
                     curr_ped_seq = curr_seq_data[curr_seq_data[:, 1] ==
-                                                 ped_id, :]
-                    curr_ped_seq = np.around(curr_ped_seq, decimals=4)
-                    pad_front = frames.index(curr_ped_seq[0, 0]) - idx
-                    pad_end = frames.index(curr_ped_seq[-1, 0]) - idx + 1
-                    if pad_end - pad_front != self.seq_len:
+                                                 ped_id, :]        //把第二列等于ped_id的观测数据保存为二维numpy数组
+                    curr_ped_seq = np.around(curr_ped_seq, decimals=4)    //将观测数据保留4位小数
+                    pad_front = frames.index(curr_ped_seq[0, 0]) - idx    //对于第一个子轨迹，pad_front=0，第二个子轨迹pad_front=0，所以pad_front固定为0
+                    pad_end = frames.index(curr_ped_seq[-1, 0]) - idx + 1    //pad_end固定为20
+                    if pad_end - pad_front != self.seq_len:    //忽略不够seq_len长度的子轨迹，只使用行数为20即有20帧观测数据的子轨迹
                         continue
-                    curr_ped_seq = np.transpose(curr_ped_seq[:, 2:])
-                    curr_ped_seq = curr_ped_seq
+                    curr_ped_seq = np.transpose(curr_ped_seq[:, 2:])    //选取观测数据的2、3、4、5列，然后转置，得到的numpy数组每一列是一帧观测数据，行数是4，列数是20
+                    curr_ped_seq = curr_ped_seq                         //此时得到的numpy数组才是真正用于训练的数据，共有4种数据
 
-                    curr_ped_date_mask = [x[0] for x in addinf[idx:idx+pred_len+obs_len]]
-                    curr_ped_date_mask = self.embed_time(curr_ped_date_mask)
+                    curr_ped_date_mask = [x[0] for x in addinf[idx:idx+pred_len+obs_len]]        //选取子轨迹中的时间数据，20个，组成列表
+                    curr_ped_date_mask = self.embed_time(curr_ped_date_mask)    //
                     # Make coordinates relative
                     # rel_curr_ped_seq 存相邻两个坐标点中间的差  后-前
                     rel_curr_ped_seq = np.zeros(curr_ped_seq.shape)
