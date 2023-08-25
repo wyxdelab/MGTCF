@@ -178,16 +178,16 @@ class TrajectoryDataset(Dataset):
                     curr_ped_seq = curr_ped_seq                         //此时得到的numpy数组才是真正用于训练的数据，共有4种数据
 
                     curr_ped_date_mask = [x[0] for x in addinf[idx:idx+pred_len+obs_len]]        //选取子轨迹中的时间数据，20个，组成列表
-                    curr_ped_date_mask = self.embed_time(curr_ped_date_mask)    //
+                    curr_ped_date_mask = self.embed_time(curr_ped_date_mask)    //将时间数据归一化处理，并修改格式为(1,4,20)的numpy数组
                     # Make coordinates relative
                     # rel_curr_ped_seq 存相邻两个坐标点中间的差  后-前
-                    rel_curr_ped_seq = np.zeros(curr_ped_seq.shape)
+                    rel_curr_ped_seq = np.zeros(curr_ped_seq.shape)    //(4,20)
                     rel_curr_ped_seq[:, 1:] = \
-                        curr_ped_seq[:, 1:] - curr_ped_seq[:, :-1]
-                    _idx = num_peds_considered
-                    curr_seq[_idx, :, pad_front:pad_end] = curr_ped_seq
-                    curr_seq_rel[_idx, :, pad_front:pad_end] = rel_curr_ped_seq
-                    curr_date_mask[_idx, :, pad_front:pad_end] = curr_ped_date_mask
+                        curr_ped_seq[:, 1:] - curr_ped_seq[:, :-1]    //计算的是后一天减前一天的数据之差，四种数据都减，如1减0，19减18，得到的numpy数组第一列全0
+                    _idx = num_peds_considered    //0
+                    curr_seq[_idx, :, pad_front:pad_end] = curr_ped_seq    //shape=(1,4,20)，存储子轨迹的四种数据
+                    curr_seq_rel[_idx, :, pad_front:pad_end] = rel_curr_ped_seq    //shape=(1,4,20)，存储相邻帧的数据之差，第一列全0
+                    curr_date_mask[_idx, :, pad_front:pad_end] = curr_ped_date_mask    //shape=(1,4,20)，存储归一化的时间数据
                     # Linear vs Non-Linear Trajectory
                     _non_linear_ped.append(
                         poly_fit(curr_ped_seq, pred_len, threshold))
@@ -251,7 +251,7 @@ class TrajectoryDataset(Dataset):
     def __len__(self):
         return self.num_seq
 
-    def embed_time(self,date_list):
+    def embed_time(self,date_list):       //传入的是子轨迹的时间数据列表，共20项
         data_embed = []
         for date in date_list:
             year = (float(date[:4]) - 1949) / (2019 - 1949) - 0.5
@@ -259,7 +259,7 @@ class TrajectoryDataset(Dataset):
             day = (float(date[6:8]) - 1) / 30.0 - 0.5
             hour = float(date[8:10]) / 18 - 0.5
             data_embed.append([year, month, day, hour])
-        return np.array(data_embed).transpose(1, 0)[np.newaxis, :, :]
+        return np.array(data_embed).transpose(1, 0)[np.newaxis, :, :]        //将时间数据转换为每一列是一帧的时间数据，行数是4，列数代表帧数，有20帧，(1,4,20)
 
     def transforms(self,img):
         # mean=np.array([111.2762205937308])
