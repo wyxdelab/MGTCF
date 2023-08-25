@@ -90,7 +90,7 @@ def poly_fit(traj, traj_len, threshold):
     """
     t = np.linspace(0, traj_len - 1, traj_len)    //一维numpy数组，0~11
     res_x = np.polyfit(t, traj[0, -traj_len:], 2, full=True)[1]    //x轴为序号，y轴为经度，拟合一个二次函数，输出结果是一个一维numpy数组，包含二次函数每一项的系数
-    res_y = np.polyfit(t, traj[1, -traj_len:], 2, full=True)[1]    //x轴为序号，y轴为纬度，取的是20帧观测数据的后12个
+    res_y = np.polyfit(t, traj[1, -traj_len:], 2, full=True)[1]    //x轴为序号，y轴为纬度，取的是20帧观测数据的后12个                实际取得是一次项系数
     if res_x + res_y >= threshold:
         return 1.0
     else:
