@@ -88,9 +88,9 @@ def poly_fit(traj, traj_len, threshold):
     Output:
     - int: 1 -> Non Linear 0-> Linear
     """
-    t = np.linspace(0, traj_len - 1, traj_len)
-    res_x = np.polyfit(t, traj[0, -traj_len:], 2, full=True)[1]
-    res_y = np.polyfit(t, traj[1, -traj_len:], 2, full=True)[1]
+    t = np.linspace(0, traj_len - 1, traj_len)    //一维numpy数组，0~11
+    res_x = np.polyfit(t, traj[0, -traj_len:], 2, full=True)[1]    //x轴为序号，y轴为经度，拟合一个二次函数，输出结果是一个一维numpy数组，包含二次函数每一项的系数
+    res_y = np.polyfit(t, traj[1, -traj_len:], 2, full=True)[1]    //x轴为序号，y轴为纬度，取的是20帧观测数据的后12个
     if res_x + res_y >= threshold:
         return 1.0
     else:
@@ -190,8 +190,8 @@ class TrajectoryDataset(Dataset):
                     curr_date_mask[_idx, :, pad_front:pad_end] = curr_ped_date_mask    //shape=(1,4,20)，存储归一化的时间数据
                     # Linear vs Non-Linear Trajectory
                     _non_linear_ped.append(
-                        poly_fit(curr_ped_seq, pred_len, threshold))
-                    curr_loss_mask[_idx, pad_front:pad_end] = 1
+                        poly_fit(curr_ped_seq, pred_len, threshold))    //(1,4,20) ，12，0.002    这里意思是1的时候经度和纬度在时间上都是非线性的，0反之
+                    curr_loss_mask[_idx, pad_front:pad_end] = 1    //
                     num_peds_considered += 1
 
                 # if num_peds_considered > min_ped: 源码---
