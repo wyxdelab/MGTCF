@@ -196,9 +196,9 @@ def main(args):
     logger.info("Initializing val dataset")
     _, val_loader = data_loader(args, val_path)
 
-    iterations_per_epoch = len(train_dset) / args.batch_size #/ args.d_steps
+    iterations_per_epoch = len(train_dset) / args.batch_size #/ args.d_steps    //得到一个batch的子轨迹数量，一个周期的迭代器个数
     if args.num_epochs:
-        args.num_iterations = int(iterations_per_epoch * args.num_epochs)
+        args.num_iterations = int(iterations_per_epoch * args.num_epochs)        //
 
     logger.info(
         'There are {} iterations per epoch'.format(iterations_per_epoch)
