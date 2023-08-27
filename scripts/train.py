@@ -191,8 +191,8 @@ def main(args):
 
     long_dtype, float_dtype = get_dtypes(args)    //得到两种tensor类型
 
-    logger.info("Initializing train dataset")
-    train_dset, train_loader = data_loader(args, train_path)
+    logger.info("Initializing train dataset")        
+    train_dset, train_loader = data_loader(args, train_path)        //将轨迹的训练数据集导入生成可迭代的数据集
     logger.info("Initializing val dataset")
     _, val_loader = data_loader(args, val_path)
 
