@@ -208,7 +208,7 @@ class TrajectoryDataset(Dataset):
                     tyID.append({'old':[tyname,idx],'new':addinf[idx+self.obs_len-1],
                                  'tydate':[x[0] for x in addinf[idx:idx+pred_len+obs_len]]})
 
-        self.num_seq = len(seq_list)
+        self.num_seq = len(seq_list)    //子轨迹的数量
         seq_list = np.concatenate(seq_list, axis=0)
         seq_list_rel = np.concatenate(seq_list_rel, axis=0)
         seq_list_date_mask = np.concatenate(seq_list_date_mask, axis=0)
@@ -248,7 +248,7 @@ class TrajectoryDataset(Dataset):
         ]
         self.tyID = tyID
 
-    def __len__(self):
+    def __len__(self):    //子轨迹的数量作为类的长度
         return self.num_seq
 
     def embed_time(self,date_list):       //传入的是子轨迹的时间数据列表，共20项
